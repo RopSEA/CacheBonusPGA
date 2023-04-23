@@ -8,10 +8,11 @@
 
 
 void readMemCache(FILE *trace);
-void directMap(char** Cache);
-void twoWayMap(char** Cache);
-void fourWayMap(char** Cache);
-void fullAssociative(char** Cache);
+double directMap(char** Cache);
+double twoWayMap(char** Cache);
+double fourWayMap(char** Cache);
+double fullAssociative(char** Cache);
+double compare(double one, double two, double three, double four);
 
 int main()
 {
@@ -28,6 +29,10 @@ void readMemCache(FILE *trace)
     char** c;
     int i = 0;
     int size = 10000;
+    double dr = 0;
+    double tw = 0;
+    double frw = 0;
+    double fa = 0;
 
     c = malloc(sizeof(char*) * (size+1));
 
@@ -43,22 +48,56 @@ void readMemCache(FILE *trace)
 
     // directMap
     printf("Direct Map: \n");
-    directMap(c);
+    dr = directMap(c);
     // twoWayMap
     printf("Two way map: \n");
-    twoWayMap(c);
+    tw = twoWayMap(c);
     // fourWayMap
     printf("Four way map: \n");
-    fourWayMap(c);
+    frw = fourWayMap(c);
     // fully Associative
     printf("fully Associative map: \n");
-    fullAssociative(c);
+    fa = fullAssociative(c);
+
+    compare(dr, tw, frw, fa);
 
 
     fclose(trace);
 }
 
-void directMap(char** Cache)
+double compare(double one, double two, double three, double four)
+{
+    if ( one >= two && one >= three)
+    {
+        if (one >= four)
+        {
+           printf("direct map was the one that got the best hit rate\n");
+           return one;
+        }
+    }
+
+    if ( two >= three && two >= one)
+    {
+        if (two >= four)
+        {
+           printf("two way map was the one that got the best hit rate\n");
+           return two;
+        }
+    }
+
+    if ( three >= one && three >= two)
+    {
+        if (three >= four)
+        {
+           printf("four way map was the one that got the best hit rate\n");
+           return three;
+        }
+    }
+    printf("fully Associative map was the one that got the best hit rate\n");
+    return four;
+}
+
+double directMap(char** Cache)
 {
     int hit = 0;
     int miss = 0;
@@ -69,16 +108,44 @@ void directMap(char** Cache)
     int found = 0;
     char** map;
 
+    map = malloc(sizeof(char*) * (2 + 1));
+
+    map[0] = malloc(sizeof(char) * (15+1));
+
     while (i < size)
     {
+        if (shuffle == 0)
+        {
+            strcpy(map[0], Cache[i]);
+            miss++;
+            i++;
+            continue;
+        }
+
+        if (strcmp(map[0], Cache[i]) == 0)
+        {
+            hit++;
+            found = 1;
+            j = 3;
+        }
+
+        if (found == 0)
+        {
+          strcpy(map[0], Cache[i]);
+          miss++;
+        }
+
+        found = 0;
         i++;
     }
 
-    printf("In a direct Map %d misses and %d hits\n",  miss, hit );
+    printf("In a direct Map there are %d misses and %d hits\n",  miss, hit );
     printf("\n");
+
+    return hit / miss;
 }
 
-void twoWayMap(char** Cache)
+double twoWayMap(char** Cache)
 {
   int hit = 0;
   int miss = 0;
@@ -136,11 +203,12 @@ void twoWayMap(char** Cache)
       i++;
   }
 
-    printf("In a two-Way Map %d misses and %d hits\n",  miss, hit );
+    printf("In a two-Way Map there are %d misses and %d hits\n",  miss, hit );
     printf("\n");
+    return hit / miss;
 }
 
-void fourWayMap(char** Cache)
+double fourWayMap(char** Cache)
 {
   int hit = 0;
   int miss = 0;
@@ -200,11 +268,13 @@ void fourWayMap(char** Cache)
       i++;
   }
 
-    printf("In a four-Way Map %d misses and %d hits\n",  miss, hit );
+    printf("In a four-Way Map there are %d misses and %d hits\n",  miss, hit );
     printf("\n");
+
+    return hit / miss;
 }
 
-void fullAssociative(char** Cache)
+double fullAssociative(char** Cache)
 {
   int hit = 0;
   int miss = 0;
@@ -252,6 +322,8 @@ void fullAssociative(char** Cache)
       i++;
   }
 
-  printf("In a fully Associative Map %d misses and %d hits\n",  miss, hit );
+  printf("In a fully Associative Map there are %d misses and %d hits\n",  miss, hit );
   printf("\n");
+
+  return hit / miss;
 }
